@@ -5,20 +5,20 @@ import time
 import sys
 # opencv2 have problem in read video from file, imageio do better.
 import imageio
-from .iou import checkrule
+from iou import checkrule
 
 class YOLO_VIDEO:
     rule=['dog',100,200,30,30,0.2]
     fromvideo = None
     writer=None
     ftxt=None
-    tofile_video = 'test/output.video'
-    tofile_txt = 'test/output.txt'
+    tofile_video = '../test/output.mp4'
+    tofile_txt = '../test/output.txt'
     imshow = True
-    filewrite_video = False
-    filewrite_txt = False
+    filewrite_video = True
+    filewrite_txt = True
     disp_console = True
-    weights_file = 'weights/YOLO_small.ckpt'
+    weights_file = '../weights/YOLO_small.ckpt'
     alpha = 0.1
     threshold = 0.2
     iou_threshold = 0.5
@@ -177,7 +177,7 @@ class YOLO_VIDEO:
             reader=imageio.get_reader(filename)
             image_nums=reader.get_length()
             for i,im in enumerate(reader):
-                if i>10 :
+                if i>300 :
                     break
                 else :
                     self.detect_from_video(im,i)
@@ -267,7 +267,7 @@ class YOLO_VIDEO:
             w = int(results[i][3]) // 2
             h = int(results[i][4]) // 2
             if self.disp_console: print
-            '   frame : '+frameNum+' ,class : ' + results[i][0] + ' , [x,y,w,h]=[' + str(x) + ',' + str(y) + ',' + str(
+            '   frame : '+str(frameNum)+' ,class : ' + results[i][0] + ' , [x,y,w,h]=[' + str(x) + ',' + str(y) + ',' + str(
                 int(results[i][3])) + ',' + str(int(results[i][4])) + '], Confidence = ' + str(results[i][5])
 
             passed=checkrule(self.rule,results[i])

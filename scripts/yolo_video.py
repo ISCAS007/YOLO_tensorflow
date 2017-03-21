@@ -254,9 +254,23 @@ class YOLO_VIDEO:
 
         return result
 
+    def draw_rule(self,img):
+        x = self.rule[1]
+        y = self.rule[2]
+        w = self.rule[3]
+        h = self.rule[4]
+
+        cv2.rectangle(img, (x - w, y - h), (x + w, y + h), (0, 0, 255), 2)
+        cv2.rectangle(img, (x - w, y - h - 20), (x + w, y - h), (125, 125, 125), -1)
+        cv2.putText(img, 'no' + self.rule[0] + ' : %.2f' % self[5], (x - w + 5, y - h - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                    (0, 0, 0), 1)
+
+        return img
+
     def show_results(self, img,frameNum,results):
         #img_cp = img.copy()
         img_cp=cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        img_cp=self.draw_rule(img_cp)
         if self.filewrite_txt:
             if frameNum == 0:
                 self.ftxt = open(self.tofile_txt, 'w')

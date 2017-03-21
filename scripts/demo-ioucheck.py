@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from scripts.yolo_video import YOLO_VIDEO
+from .yolo_video import YOLO_VIDEO
 yolo = YOLO_VIDEO()
 
 yolo.disp_console = True

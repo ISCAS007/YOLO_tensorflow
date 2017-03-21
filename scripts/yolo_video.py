@@ -5,7 +5,7 @@ import time
 import sys
 # opencv2 have problem in read video from file, imageio do better.
 import imageio
-from scripts.iou import checkrule
+from .iou import checkrule
 
 class YOLO_VIDEO:
     rule=['dog',100,200,30,30,0.2]

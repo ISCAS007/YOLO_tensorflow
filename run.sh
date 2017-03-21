@@ -1,2 +1,3 @@
+git pull
 source set-opencv2.sh
-python iou.py
+python scripts/iou.py

@@ -22,7 +22,7 @@ def checkrule(rule,test):
 
 rule=['dog',100,200,30,30,0.2]
 
-img_cp=cv2.imread('a.jpg')
+img_cp=cv2.imread('test/a.jpg')
 x=rule[1]
 y=rule[2]
 w=rule[3]
@@ -36,7 +36,7 @@ cv2.putText(img_cp, 'no'+rule[0] + ' : %.2f' % rule[5], (x - w + 5, y - h - 7), 
 cv2.imshow('YOLO_small detection',img_cp)
 cv2.waitKey(0)
 
-csvfile = file('a.txt', 'r')
+csvfile = file('test/a.txt', 'r')
 reader = csv.reader(csvfile)
 
 for line in reader:

@@ -19,8 +19,8 @@ def checkrule(rule,test):
     rect1[3]+=rect1[1]
     rect2[2]+=rect2[0]
     rect2[3]+=rect2[1]
-    print("rect1 is ",rect1)
-    print("rect2 is ",rect2)
+#    print("rect1 is ",rect1)
+#    print("rect2 is ",rect2)
     w=min(rect1[2],rect2[2])-max(rect1[0],rect2[0])
     h=min(rect1[3],rect2[3])-max(rect1[1],rect2[1])
 

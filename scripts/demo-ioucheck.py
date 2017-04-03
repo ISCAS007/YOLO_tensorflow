@@ -9,5 +9,11 @@ yolo = YOLO_VIDEO()
 #yolo.tofile_txt = '../test/output.txt'
 #yolo.filewrite_video = True
 #yolo.filewrite_txt = True
-yolo.rule=['car',400,400,200,100,0.3]
+yolo.rules=[['car',400,400,100,100,0.3],['bicycle',400,300,100,100,0.3]]
 yolo.detect_from_file('/media/sdb/CVDataset/UrbanTracker/rouen_video.avi')
+
+yolo.rules=[['car',300,300,100,100,0.3],['bicycle',200,200,100,100,0.3],['person',400,400,100,100,0.3]]
+yolo.detect_from_file('/media/sdb/CVDataset/UrbanTracker/atrium_video.avi')
+
+yolo.rules=[['car',200,200,200,100,0.3],['bicycle',400,200,100,200,0.3]]
+yolo.detect_from_file('/media/sdb/CVDataset/UrbanTracker/sherbrooke_video.avi')

@@ -5,13 +5,14 @@ import time
 import sys
 # opencv2 have problem in read video from file, imageio do better.
 import imageio
-from iou import checkrule
+from iou import checkrules
+
 
 class YOLO_VIDEO:
-    rule=['dog',100,200,30,30,0.2]
+    rules = [['dog', 100, 200, 30, 30, 0.2],['car', 100, 100, 30, 50, 0.2],['person', 200, 100, 50, 30, 0.2]]
     fromvideo = None
-    writer=None
-    ftxt=None
+    writer = None
+    ftxt = None
     tofile_video = '../test/output.mp4'
     tofile_txt = '../test/output.txt'
     imshow = True
@@ -109,7 +110,7 @@ class YOLO_VIDEO:
         conv_biased = tf.add(conv, biases, name=str(idx) + '_conv_biased')
         if self.disp_console: print
         '    Layer  %d : Type = Conv, Size = %d * %d, Stride = %d, Filters = %d, Input channels = %d' % (
-        idx, size, size, stride, filters, int(channels))
+            idx, size, size, stride, filters, int(channels))
         return tf.maximum(self.alpha * conv_biased, conv_biased, name=str(idx) + '_leaky_relu')
 
     def pooling_layer(self, idx, inputs, size, stride):
@@ -131,7 +132,7 @@ class YOLO_VIDEO:
         biases = tf.Variable(tf.constant(0.1, shape=[hiddens]))
         if self.disp_console: print
         '    Layer  %d : Type = Full, Hidden = %d, Input dimension = %d, Flat = %d, Activation = %d' % (
-        idx, hiddens, int(dim), int(flat), 1 - int(linear))
+            idx, hiddens, int(dim), int(flat), 1 - int(linear))
         if linear: return tf.add(tf.matmul(inputs_processed, weight), biases, name=str(idx) + '_fc')
         ip = tf.add(tf.matmul(inputs_processed, weight), biases)
         return tf.maximum(self.alpha * ip, ip, name=str(idx) + '_fc')
@@ -152,19 +153,19 @@ class YOLO_VIDEO:
         if self.disp_console: print
         'Elapsed time : ' + strtime + ' secs' + '\n'
 
-    def detect_from_video(self, img,frameNum):
+    def detect_from_video(self, img, frameNum):
         s = time.time()
         self.h_img, self.w_img, _ = img.shape
         img_resized = cv2.resize(img, (448, 448))
         # img_RGB = cv2.cvtColor(img_resized, cv2.COLOR_BGR2RGB)
-        img_RGB=img_resized
+        img_RGB = img_resized
         img_resized_np = np.asarray(img_RGB)
         inputs = np.zeros((1, 448, 448, 3), dtype='float32')
         inputs[0] = (img_resized_np / 255.0) * 2.0 - 1.0
         in_dict = {self.x: inputs}
         net_output = self.sess.run(self.fc_32, feed_dict=in_dict)
         self.result = self.interpret_output(net_output[0])
-        self.show_results(img, frameNum,self.result)
+        self.show_results(img, frameNum, self.result)
         strtime = str(time.time() - s)
         if self.disp_console: print
         'Elapsed time : ' + strtime + ' secs' + '\n'
@@ -173,14 +174,14 @@ class YOLO_VIDEO:
         if self.disp_console: print
         'Detect from ' + filename
 
-        if(filename.endswith('avi') or filename.endswith('.mp4')):
-            reader=imageio.get_reader(filename)
-            image_nums=reader.get_length()
-            for i,im in enumerate(reader):
-                if i>300 :
+        if (filename.endswith('avi') or filename.endswith('.mp4')):
+            reader = imageio.get_reader(filename)
+            image_nums = reader.get_length()
+            for i, im in enumerate(reader):
+                if i > 300:
                     break
-                else :
-                    self.detect_from_video(im,i)
+                else:
+                    self.detect_from_video(im, i)
             if self.filewrite_video:
                 self.writer.close()
             if self.filewrite_txt:
@@ -254,23 +255,29 @@ class YOLO_VIDEO:
 
         return result
 
-    def draw_rule(self,img):
-        x = self.rule[1]
-        y = self.rule[2]
-        w = self.rule[3]
-        h = self.rule[4]
+    def draw_rule(rule, img):
+        x = rule[1]
+        y = rule[2]
+        w = rule[3]
+        h = rule[4]
 
         cv2.rectangle(img, (x - w, y - h), (x + w, y + h), (0, 0, 255), 2)
         cv2.rectangle(img, (x - w, y - h - 20), (x + w, y - h), (125, 125, 125), -1)
-        cv2.putText(img, 'no' + self.rule[0] + ' : %.2f' % self[5], (x - w + 5, y - h - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+        cv2.putText(img, 'no' + rule[0] + ' : %.2f' % rule[5], (x - w + 5, y - h - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     (0, 0, 0), 1)
 
         return img
 
-    def show_results(self, img,frameNum,results):
-        #img_cp = img.copy()
-        img_cp=cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        img_cp=self.draw_rule(img_cp)
+    def draw_rules(self, img):
+        for rule in self.rules:
+            img = self.draw_rule(rule, img)
+
+        return img
+
+    def show_results(self, img, frameNum, results):
+        # img_cp = img.copy()
+        img_cp = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        img_cp = self.draw_rules(img_cp)
         if self.filewrite_txt:
             if frameNum == 0:
                 self.ftxt = open(self.tofile_txt, 'w')
@@ -280,25 +287,29 @@ class YOLO_VIDEO:
             y = int(results[i][2])
             w = int(results[i][3]) // 2
             h = int(results[i][4]) // 2
-            if self.disp_console: print
-            '   frame : '+str(frameNum)+' ,class : ' + results[i][0] + ' , [x,y,w,h]=[' + str(x) + ',' + str(y) + ',' + str(
-                int(results[i][3])) + ',' + str(int(results[i][4])) + '], Confidence = ' + str(results[i][5])
+            if self.disp_console:
+                print
+                '   frame : ' + str(frameNum) + ' ,class : ' + results[i][0] + ' , [x,y,w,h]=[' + str(x) + ',' + str(
+                    y) + ',' + str(int(results[i][3])) + ',' + str(int(results[i][4])) + '], Confidence = ' + str(
+                    results[i][5])
 
-            passed=checkrule(self.rule,results[i])
+            passed = checkrules(self.rules, results[i])
             if self.filewrite_video or self.imshow:
-                headstr=''
-                if(passed):
+                headstr = ''
+                if (passed):
                     cv2.rectangle(img_cp, (x - w, y - h), (x + w, y + h), (0, 255, 0), 2)
-                    headstr=''
+                    headstr = ''
                 else:
                     cv2.rectangle(img_cp, (x - w, y - h), (x + w, y + h), (0, 0, 255), 2)
-                    headstr='warning: '
+                    headstr = 'warning: '
                 cv2.rectangle(img_cp, (x - w, y - h - 20), (x + w, y - h), (125, 125, 125), -1)
-                cv2.putText(img_cp, headstr+results[i][0] + ' : %.2f' % results[i][5], (x - w + 5, y - h - 7),
+                cv2.putText(img_cp, headstr + results[i][0] + ' : %.2f' % results[i][5], (x - w + 5, y - h - 7),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
             if self.filewrite_txt:
-                self.ftxt.write(str(frameNum)+','+results[i][0] + ',' + str(x) + ',' + str(y) + ',' + str(w) + ',' + str(h) + ',' + str(
-                    results[i][5]) + '\n')
+                self.ftxt.write(
+                    str(frameNum) + ',' + results[i][0] + ',' + str(x) + ',' + str(y) + ',' + str(w) + ',' + str(
+                        h) + ',' + str(
+                        results[i][5]) + '\n')
         if self.filewrite_video:
             if self.disp_console: print
             '    image file writed : ' + self.tofile_video

@@ -29,6 +29,20 @@ def checkrule(rule,test):
     else:
         return False
 
+def checkrules(rules,test):
+    """
+        return true if rule passed
+        return false if rule not passed, which means overlap with the same type
+        eg: rule=['dog',100,200,30,30,0.2]
+        note: currently rule[5]=0.2 is not used!
+    """
+
+    for rule in rules:
+        if(not checkrule(rule,test)):
+            return False
+
+    return True
+
 if __name__ == '__main__':
     rule=['dog',100,200,30,30,0.2]
 

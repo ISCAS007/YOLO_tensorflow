@@ -7,7 +7,7 @@ def checkrule(rule,test):
     """
         return true if rule passed
         return false if rule not passed, which means overlap with the same type
-        eg: rule=['dog',100,200,30,30,0.2]
+        eg: rule=['dog',100,200,30,30,0.2] , [type,x_top_left,y_top_left,width,height,possibility]
         note: currently rule[5]=0.2 is not used!
     """
     if(rule[0]!=test[0]):
@@ -15,6 +15,8 @@ def checkrule(rule,test):
 
     rect1=rule[1:5]
     rect2=test[1:5]
+
+    # convert [x1,y1,w,h] to [x1,y1,x2,y2]
     rect1[2]+=rect1[0]
     rect1[3]+=rect1[1]
     rect2[2]+=rect2[0]
@@ -38,6 +40,12 @@ def checkrules(rules,test):
     """
 
     for rule in rules:
+        # convert center to top left
+        # [x_c,y_c,w,h] -> [x1,y1,w,h]
+        rule[1]=rule[1]-rule[3]//2
+        rule[2]=rule[2]-rule[4]//2
+        test[1]=test[1]-test[3]//2
+        test[2]=test[2]-test[4]//2
         if(not checkrule(rule,test)):
             return False
 

@@ -287,6 +287,7 @@ class YOLO_VIDEO:
             y = int(results[i][2])
             w = int(results[i][3]) // 2
             h = int(results[i][4]) // 2
+
             if self.disp_console:
                 print
                 '   frame : ' + str(frameNum) + ' ,class : ' + results[i][0] + ' , [x,y,w,h]=[' + str(x) + ',' + str(
@@ -318,7 +319,7 @@ class YOLO_VIDEO:
             if frameNum == 0:
                 self.writer = imageio.get_writer(self.tofile_video, fps=30)
 
-            self.writer.append_data(img)
+            self.writer.append_data(img_cp)
 
         if self.imshow:
             cv2.imshow('YOLO_small detection', img_cp)

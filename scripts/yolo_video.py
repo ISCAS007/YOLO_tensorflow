@@ -255,7 +255,7 @@ class YOLO_VIDEO:
 
         return result
 
-    def draw_rule(rule, img):
+    def draw_rule(self,rule, img):
         x = rule[1]
         y = rule[2]
         w = rule[3]

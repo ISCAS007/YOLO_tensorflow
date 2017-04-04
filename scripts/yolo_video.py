@@ -11,6 +11,7 @@ from iou import checkrules
 class YOLO_VIDEO:
     rules = [['dog', 100, 200, 30, 30, 0.2],['car', 100, 100, 30, 50, 0.2],['person', 200, 100, 50, 30, 0.2]]
     fromvideo = None
+    MaxFrameNum = 0
     writer = None
     ftxt = None
     tofile_video = '../test/output.mp4'
@@ -178,7 +179,7 @@ class YOLO_VIDEO:
             reader = imageio.get_reader(filename)
             image_nums = reader.get_length()
             for i, im in enumerate(reader):
-                if i > 300:
+                if (not self.MaxFrameNum == 0) and (i > self.MaxFrameNum) :
                     break
                 else:
                     self.detect_from_video(im, i)
@@ -256,10 +257,10 @@ class YOLO_VIDEO:
         return result
 
     def draw_rule(self,rule, img):
-        x = rule[1]
-        y = rule[2]
-        w = rule[3]
-        h = rule[4]
+        x = int(rule[1])
+        y = int(rule[2])
+        w = int(rule[3]) // 2
+        h = int(rule[4]) // 2
 
         cv2.rectangle(img, (x - w, y - h), (x + w, y + h), (0, 0, 255), 2)
         cv2.rectangle(img, (x - w, y - h - 20), (x + w, y - h), (125, 125, 125), -1)
@@ -277,6 +278,10 @@ class YOLO_VIDEO:
     def show_results(self, img, frameNum, results):
         # img_cp = img.copy()
         img_cp = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        if frameNum % 5 == 0:
+            for rule in self.rules:
+                print('rule is ',rule)
+
         img_cp = self.draw_rules(img_cp)
         if self.filewrite_txt:
             if frameNum == 0:

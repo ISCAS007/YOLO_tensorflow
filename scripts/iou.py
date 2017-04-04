@@ -31,14 +31,15 @@ def checkrule(rule,test):
     else:
         return False
 
-def checkrules(rules,test):
+def checkrules(rules_check,test_check):
     """
         return true if rule passed
         return false if rule not passed, which means overlap with the same type
         eg: rule=['dog',100,200,30,30,0.2]
         note: currently rule[5]=0.2 is not used!
     """
-
+    rules=rules_check[:]
+    test=test_check[:]
     for rule in rules:
         # convert center to top left
         # [x_c,y_c,w,h] -> [x1,y1,w,h]

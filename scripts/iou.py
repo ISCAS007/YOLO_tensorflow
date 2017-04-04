@@ -43,11 +43,13 @@ def checkrules(rules_check,test_check):
     for rule in rules:
         # convert center to top left
         # [x_c,y_c,w,h] -> [x1,y1,w,h]
-        rule[1]=rule[1]-rule[3]//2
-        rule[2]=rule[2]-rule[4]//2
-        test[1]=test[1]-test[3]//2
-        test[2]=test[2]-test[4]//2
-        if(not checkrule(rule,test)):
+        rule_c=rule[:]
+        rule_c[1]=rule[1]-rule[3]//2
+        rule_c[2]=rule[2]-rule[4]//2
+        test_c=test[:]
+        test_c[1]=test[1]-test[3]//2
+        test_c[2]=test[2]-test[4]//2
+        if(not checkrule(rule_c,test_c)):
             return False
 
     return True

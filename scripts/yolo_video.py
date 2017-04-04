@@ -278,9 +278,6 @@ class YOLO_VIDEO:
     def show_results(self, img, frameNum, results):
         # img_cp = img.copy()
         img_cp = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        if frameNum % 5 == 0:
-            for rule in self.rules:
-                print('rule is ',rule)
 
         img_cp = self.draw_rules(img_cp)
         if self.filewrite_txt:

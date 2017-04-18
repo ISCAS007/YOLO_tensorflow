@@ -3,8 +3,8 @@
 input=$1
 output=$2
 
-source deactivate
+# source deactivate
 
 labelme $input -O $output
 
-source activate env2
+# source activate env2

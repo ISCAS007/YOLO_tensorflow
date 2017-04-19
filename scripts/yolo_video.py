@@ -295,7 +295,7 @@ class YOLO_VIDEO:
             rule_points=np.int32(np.array(rule['points']))
             pt1=rule_points.min(0)
             pt2=rule_points.max(0)
-            cv2.rectangle(img=img, pt1=pt1, pt2=pt2, color=COLOR_RULE, thickness=2)
+            cv2.rectangle(img=img, pt1=tuple(pt1), pt2=tuple(pt2), color=COLOR_RULE, thickness=2)
 
             # draw label
             cv2.rectangle(img, (pt1[0], pt1[1] - 20), (pt2[0], pt1[1]), (125, 125, 125), -1)

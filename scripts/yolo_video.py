@@ -290,12 +290,12 @@ class YOLO_VIDEO:
 
         #draw predefine rules
         for rule in self.rules:
-            cv2.polylines(img, np.int32(np.array([rule['points']])),isClosed=True, color=COLOR_RULE, thinkness=2)
+            cv2.polylines(img, np.int32(np.array([rule['points']])),isClosed=True, color=COLOR_RULE, thickness=2)
             # draw label
             rule_points=np.int32(np.array(rule['points']))
             pt1=rule_points.min(0)
             pt2=rule_points.max(0)
-            cv2.rectangle(img=img, pt1=pt1, pt2=pt2, color=COLOR_RULE, thinckness=2)
+            cv2.rectangle(img=img, pt1=pt1, pt2=pt2, color=COLOR_RULE, thickness=2)
 
             # draw label
             cv2.rectangle(img, (pt1[0], pt1[1] - 20), (pt2[0], pt1[1]), (125, 125, 125), -1)
@@ -307,7 +307,7 @@ class YOLO_VIDEO:
             detect_img=np.zeros(img_size,np.uint8)
             pt1=(int(rect[1]-rect[3]/2),int(rect[2]-rect[4]/2))
             pt2=(int(rect[1]+rect[3]/2),int(rect[2]+rect[4]/2))
-            cv2.rectangle(img=detect_img,pt1=pt1,pt2=pt2,color=255,thinckness=-1)
+            cv2.rectangle(img=detect_img,pt1=pt1,pt2=pt2,color=255,thickness=-1)
 
             COLOR=COLOR_NORMAL
             headstr=''

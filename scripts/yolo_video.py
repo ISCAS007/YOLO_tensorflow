@@ -179,7 +179,7 @@ class YOLO_VIDEO:
             print('file not exsit ',filename)
             sys.exit()
 
-        if (filename.endswith('avi','mp4','mov')):
+        if (filename.endswith(('avi','mp4','mov'))):
             reader = imageio.get_reader(filename)
             image_nums = reader.get_length()
             for i, im in enumerate(reader):

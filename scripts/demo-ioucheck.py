@@ -25,7 +25,7 @@ def yolo_video_process(inputfile,rulefile):
 
     yolo.tofile_video = '../test/rouen_video.avi'
     yolo.tofile_txt = '../test/rouen_video.txt'
-    yolo.MaxFrameNum = 10
+    yolo.MaxFrameNum = 300
     #yolo.detect_from_file('/media/sdb/CVDataset/UrbanTracker/rouen_video.avi')
     if not os.path.exists(inputfile):
         print('input file not exists')

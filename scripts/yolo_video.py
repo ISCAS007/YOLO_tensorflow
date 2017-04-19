@@ -315,7 +315,7 @@ class YOLO_VIDEO:
             for i,rule_img in enumerate(self.rule_imgs):
                 #check the label for detect object and predefine rule
                 if rect[0]==self.rules[i]['label']:
-                    if cv2.bitwise_and(detect_img,rule_img)[0]>0:
+                    if cv2.sumElems(cv2.bitwise_and(detect_img,rule_img))[0]>0:
                         COLOR=COLOR_WARNING
                         headstr = 'warning: '
                         thinkness=4

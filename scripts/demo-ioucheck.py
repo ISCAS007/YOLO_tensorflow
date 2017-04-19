@@ -4,7 +4,7 @@ from yolo_video import YOLO_VIDEO
 import os,sys,json
 import numpy as np
 
-def yolo_video_process(inputfile,rulefile)
+def yolo_video_process(inputfile,rulefile):
     yolo = YOLO_VIDEO()
 
     #yolo.disp_console = True

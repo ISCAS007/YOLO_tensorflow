@@ -23,7 +23,11 @@ def main():
         print('input file not exists')
         sys.exit()
 
+    # avoid override ask
     imgname = 'out.jpg'
+    if os.path.exists(imgname):
+        os.system('rm '+imgname)
+
     if args.input.lower().endswith(('avi', 'mp4', 'mov')):
         cmd = 'ffmpeg -i ' + args.input + ' -frames 1 ' + imgname
         os.system(cmd)
@@ -33,7 +37,11 @@ def main():
         print('input is not image or video')
         sys.exit()
 
+    # avoid override ask
     outfile = 'out.json'
+    if os.path.exists(outfile):
+        os.system('rm ' + outfile)
+
     cmd = './labelme_sh.sh ' + imgname + ' ' + outfile
     print(cmd)
     os.system(cmd)

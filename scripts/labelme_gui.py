@@ -41,7 +41,7 @@ def main():
     if args.input.lower().endswith(('avi', 'mp4', 'mov')):
         cmd = '/usr/bin/python demo-ioucheck.py ' + args.input + ' ' + outfile
         print(cmd)
-        os.system(cmd)
+        #os.system(cmd)
 
 
 if __name__ == '__main__':

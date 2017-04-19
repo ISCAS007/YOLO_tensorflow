@@ -32,3 +32,10 @@ def yolo_video_process(inputfile,rulefile)
         sys.exit()
 
     yolo.detect_from_file(inputfile)
+
+if __name__ == '__main__':
+    if(len(sys.argv)<3):
+        print('usage: python',sys.argv[0],'inputfile','rulefile')
+        sys.exit()
+
+    yolo_video_process(sys.argv[1],sys.argv[2])

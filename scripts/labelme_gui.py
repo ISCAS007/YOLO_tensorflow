@@ -2,40 +2,47 @@
 A simple Gooey example. One required field, one optional.
 '''
 
-
 import argparse
 from gooey import Gooey, GooeyParser
-import os,sys
+import os, sys
+
 
 @Gooey()
 def main():
-  parser = GooeyParser(description='A simple gui.')
+    parser = GooeyParser(description='A simple gui.')
 
-  parser.add_argument(
-    'input',
-    metavar='Input Image/Video file to Label',
-    help='Image(jpg,png,jpeg);Video(mp4,avi)',
-    widget="FileChooser",
-    default='/home/yzbx/Pictures/Car.png')
+    parser.add_argument(
+        'input',
+        metavar='Input Image/Video file to Label',
+        help='Image(jpg,png,jpeg);Video(mp4,avi)',
+        widget="FileChooser",
+        default='/home/nfs/sherbrooke_video.avi')
 
-  args = parser.parse_args()
-  if not os.path.exists(args.input):
-    print('input file not exists')
-    sys.exit()
+    args = parser.parse_args()
+    if not os.path.exists(args.input):
+        print('input file not exists')
+        sys.exit()
 
-  imgname='out.jpg'
-  if args.input.lower().endswith(('avi','mp4','mov')):
-    cmd='ffmpeg -i '+args.input+' -frames 1 '+imgname
+    imgname = 'out.jpg'
+    if args.input.lower().endswith(('avi', 'mp4', 'mov')):
+        cmd = 'ffmpeg -i ' + args.input + ' -frames 1 ' + imgname
+        os.system(cmd)
+    elif args.input.lower().endswith(('jpg', 'png', 'jpeg')):
+        imgname = args.input
+    else:
+        print('input is not image or video')
+        sys.exit()
+
+    outfile = 'out.json'
+    cmd = './labelme_sh.sh ' + imgname + ' ' + outfile
+    print(cmd)
     os.system(cmd)
-  elif args.input.lower().endswith(('jpg','png','jpeg')):
-    imgname=args.input
-  else:
-    print('input is not image or video')
-    sys.exit()
 
-  cmd='./labelme_sh.sh '+imgname+" out.json"
-  print(cmd)
-  os.system(cmd)
+    if args.input.lower().endswith(('avi', 'mp4', 'mov')):
+        cmd = '/usr/bin/python demo-ioucheck.py ' + args.input + ' ' + outfile
+        print(cmd)
+        os.system(cmd)
+
 
 if __name__ == '__main__':
-  main()
+    main()

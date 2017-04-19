@@ -2,14 +2,13 @@ import numpy as np
 import tensorflow as tf
 import cv2
 import time
-import sys
+import sys,os
 # opencv2 have problem in read video from file, imageio do better.
 import imageio
-from iou import checkrules
-
 
 class YOLO_VIDEO:
-    rules = [['dog', 100, 200, 30, 30, 0.2],['car', 100, 100, 30, 50, 0.2],['person', 200, 100, 50, 30, 0.2]]
+    rules = []
+    rule_imgs=[]
     fromvideo = None
     MaxFrameNum = 0
     writer = None
@@ -172,10 +171,15 @@ class YOLO_VIDEO:
         'Elapsed time : ' + strtime + ' secs' + '\n'
 
     def detect_from_file(self, filename):
+
         if self.disp_console: print
         'Detect from ' + filename
 
-        if (filename.endswith('avi') or filename.endswith('.mp4')):
+        if not os.path.exists(filename):
+            print('file not exsit ',filename)
+            sys.exit()
+
+        if (filename.endswith('avi','mp4','mov')):
             reader = imageio.get_reader(filename)
             image_nums = reader.get_length()
             for i, im in enumerate(reader):
@@ -187,6 +191,9 @@ class YOLO_VIDEO:
                 self.writer.close()
             if self.filewrite_txt:
                 self.ftxt.close()
+        else:
+            print('unsupport video(avi,mp4,mov) input')
+            sys.exit()
 
     def detect_from_crop_sample(self):
         self.w_img = 640
@@ -256,33 +263,93 @@ class YOLO_VIDEO:
 
         return result
 
-    def draw_rule(self,rule, img):
-        x = int(rule[1])
-        y = int(rule[2])
-        w = int(rule[3]) // 2
-        h = int(rule[4]) // 2
+    def check_draw_rules(self,img,detect_areas):
+        """check the rule from detected area
 
-        cv2.rectangle(img, (x - w, y - h), (x + w, y + h), (0, 0, 255), 2)
-        cv2.rectangle(img, (x - w, y - h - 20), (x + w, y - h), (125, 125, 125), -1)
-        cv2.putText(img, 'no' + rule[0] + ' : %.2f' % rule[5], (x - w + 5, y - h - 7), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                    (0, 0, 0), 1)
+        :param img: draw detected area on img, with different color
+        :param detect_areas: rectangle detect by yolo
+        :return: img
 
-        return img
+        self.rules: predefine poly area
+        """
 
-    def draw_rules(self, img):
+        COLOR_NORMAL=(0,255,0)
+        COLOR_WARNING=(255,0,0)
+        COLOR_RULE=COLOR_NORMAL
+
+        h, w, _ = img.shape
+        img_size = (h, w)
+
+        #create predefine poly area image
+        if self.rule_imgs.__len__() == 0:
+            for i,rule in enumerate(self.rules):
+                img_rule = np.zeros(img_size, np.uint8)
+                cv2.fillPoly(img_rule, np.int32(np.array([rule['points']])), 255)
+                cv2.imwrite('rule_' + i.__str__() + ".png", img_rule)
+                self.rule_imgs.append(img_rule)
+
+        #draw predefine rules
         for rule in self.rules:
-            img = self.draw_rule(rule, img)
+            cv2.polylines(img, np.int32(np.array([rule['points']])),isClosed=True, color=COLOR_RULE, thinkness=2)
+            # draw label
+            rule_points=np.int32(np.array(rule['points']))
+            pt1=rule_points.min(0)
+            pt2=rule_points.max(0)
+            cv2.rectangle(img=img, pt1=pt1, pt2=pt2, color=COLOR_RULE, thinckness=2)
+
+            # draw label
+            cv2.rectangle(img, (pt1[0], pt1[1] - 20), (pt2[0], pt1[1]), (125, 125, 125), -1)
+            cv2.putText(img, rule['label'] , (pt1[0] + 5, pt1[1] - 7),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
+
+        #create image with detected rectangle area from yolo
+        for rect in detect_areas:
+            detect_img=np.zeros(img_size,np.uint8)
+            pt1=(int(rect[1]-rect[3]/2),int(rect[2]-rect[4]/2))
+            pt2=(int(rect[1]+rect[3]/2),int(rect[2]+rect[4]/2))
+            cv2.rectangle(img=detect_img,pt1=pt1,pt2=pt2,color=255,thinckness=-1)
+
+            COLOR=COLOR_NORMAL
+            headstr=''
+            thinkness=2
+            for i,rule_img in enumerate(self.rule_imgs):
+                #check the label for detect object and predefine rule
+                if rect[0]==self.rules[i]['label']:
+                    if cv2.bitwise_and(detect_img,rule_img)[0]>0:
+                        COLOR=COLOR_WARNING
+                        headstr = 'warning: '
+                        thinkness=4
+
+            # draw detect result and warning
+            x = int(rect[1])
+            y = int(rect[2])
+            w = int(rect[3]) // 2
+            h = int(rect[4]) // 2
+            cv2.rectangle(img, (x - w, y - h), (x + w, y + h), COLOR, thinkness)
+
+            # draw label
+            cv2.rectangle(img, (x - w, y - h - 20), (x + w, y - h), (125, 125, 125), -1)
+            cv2.putText(img, headstr + rect[0] + ' : %.2f' % rect[5], (x - w + 5, y - h - 7),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
         return img
 
     def show_results(self, img, frameNum, results):
-        # img_cp = img.copy()
-        img_cp = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        """
 
-        img_cp = self.draw_rules(img_cp)
+        :param img: input frame from video
+        :param frameNum: start from 0, detail see enumerate
+        :param results: list for [label,x_c,y_c,w,h,probability]. eg: ['dog',25,25,10,10,0.2]
+        :return:
+        """
+        img_cp = img.copy()
+
         if self.filewrite_txt:
             if frameNum == 0:
                 self.ftxt = open(self.tofile_txt, 'w')
+
+        # check and draw rules
+        img_cp=self.check_draw_rules(img_cp,results)
 
         for i in range(len(results)):
             x = int(results[i][1])
@@ -296,18 +363,6 @@ class YOLO_VIDEO:
                     y) + ',' + str(int(results[i][3])) + ',' + str(int(results[i][4])) + '], Confidence = ' + str(
                     results[i][5])
 
-            passed = checkrules(self.rules, results[i])
-            if self.filewrite_video or self.imshow:
-                headstr = ''
-                if (passed):
-                    cv2.rectangle(img_cp, (x - w, y - h), (x + w, y + h), (0, 255, 0), 2)
-                    headstr = ''
-                else:
-                    cv2.rectangle(img_cp, (x - w, y - h), (x + w, y + h), (0, 0, 255), 2)
-                    headstr = 'warning: '
-                cv2.rectangle(img_cp, (x - w, y - h - 20), (x + w, y - h), (125, 125, 125), -1)
-                cv2.putText(img_cp, headstr + results[i][0] + ' : %.2f' % results[i][5], (x - w + 5, y - h - 7),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
             if self.filewrite_txt:
                 self.ftxt.write(
                     str(frameNum) + ',' + results[i][0] + ',' + str(x) + ',' + str(y) + ',' + str(w) + ',' + str(
